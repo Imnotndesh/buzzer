@@ -21,7 +21,7 @@ func initializeDB(DBname string) (db *buntdb.DB, err error) {
 }
 
 const (
-	dbName string = "./DB_Worker/.machines"
+	dbName string = ".machines"
 )
 
 func StoreMachine(alias string, MACstr string) error {
