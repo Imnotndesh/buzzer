@@ -77,3 +77,22 @@ func WakeWithAlias(alias string) error {
 	}
 	return nil
 }
+func EditMachineDetails(alias string, MACstr string) error {
+	newMachine := machine{alias, MACstr}
+	db, err := initializeDB(dbName)
+	if err != nil {
+		return err
+	}
+	err = db.Update(func(tx *buntdb.Tx) error {
+		_, err := tx.Delete(newMachine.Alias)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	err = StoreMachine(newMachine.Alias, newMachine.MAC)
+	if err != nil {
+		return err
+	}
+	return nil
+}
