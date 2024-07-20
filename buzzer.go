@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	version = "0.2.0 alpha"
+	version = "0.2.2"
 )
 
 func helpMessage() string {
@@ -20,8 +20,9 @@ func helpMessage() string {
 	Options:
 		-b [MAC_ADDRESS]						Wakes machine using the passed MAC ADDRESS
 		-e [ALIAS] [MAC_ADDRESS]					Changes MAC_ADDRESS value of passed ALIAS to passed MAC_ADDRESS 
-		-g [ALIAS]							Fetches MAC ADDRESS bound to the passed ALIAS
+		-g [STORED_ALIAS]							Fetches MAC ADDRESS bound to the passed ALIAS
 		-h								Help text
+		-l								Prints out all stored aliases along with their MAC_ADDRESSES
 		-s [ALIAS] [MAC_ADDRESS]					Binds the passed alias and saves it
 		-V								Prints version of the program
 		-w [ALIAS]							Wakes machine using the passed ALIAS
@@ -83,6 +84,12 @@ func main() {
 			fmt.Println("Waking" + MAC + " ...")
 		case "-h":
 			fmt.Println(helpMessage())
+		case "-l":
+			err := DB_Worker.ListAllMachies()
+			if err != nil {
+				log.Println(err)
+				os.Exit(1)
+			}
 		case "-v":
 			fmt.Println(version)
 		}

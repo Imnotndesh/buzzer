@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tidwall/buntdb"
+	"strconv"
 )
 
 type machine struct {
@@ -91,6 +92,25 @@ func EditMachineDetails(alias string, MACstr string) error {
 		return nil
 	})
 	err = StoreMachine(newMachine.Alias, newMachine.MAC)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func ListAllMachies() error {
+	db, err := initializeDB(dbName)
+	if err != nil {
+		return err
+	}
+	err = db.View(func(tx *buntdb.Tx) error {
+		var index int = 0
+		err = tx.Ascend("", func(key, value string) bool {
+			fmt.Println(strconv.Itoa(index) + "----------\n" + "Alias : " + key + "\n" + "MAC_ADDRESS: " + value)
+			index += 1
+			return true
+		})
+		return err
+	})
 	if err != nil {
 		return err
 	}
