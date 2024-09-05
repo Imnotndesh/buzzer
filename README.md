@@ -1,5 +1,6 @@
 # Buzzer
-An uncomplicated Wake On Lan Program
+An uncomplicated Wake On Lan Program  
+Full documentation is located [Here](https://imnotndesh.github.io/buzzer/)
 
 # Usage
 - On linux
@@ -7,8 +8,7 @@ An uncomplicated Wake On Lan Program
 
 - On Windows
   ```./buzzer.exe [OPTIONS] [MAC_ADDRESS] [IP_ADDRESS]```
-
-## Valid Options
+## Commands
 | Flag | Usage                        | Description                                           |
 |------|------------------------------|-------------------------------------------------------|
 | -b   | -b [ MACHINE_MAC ]           | Wakes a machine using the passed MAC address          |
