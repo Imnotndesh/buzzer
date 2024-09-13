@@ -15,10 +15,10 @@ Make sure You have golang installed in your system then execute the following:
 ```
 git clone 'https://github.com/Imnotndesh/buzzer.git'
 cd Buzzer
-go build -o buzzer buzzer.go
+go build -o buzzer main.go
 ```
 # Commands
-Buzzer uses the following flags to achieve its functions:
+Buzzer uses the following flags (_case-insensitive_) to achieve its functions:
 ## -h 
 * Displays a summary of all usages for the program
 ## -b [MAC_ADDRESS]

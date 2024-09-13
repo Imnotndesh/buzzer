@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 const (
-	version = "0.2.2"
+	version = "v1.0.0"
 )
 
 func helpMessage() string {
@@ -18,14 +19,15 @@ func helpMessage() string {
 		buzzer [options]
 	
 	Options:
-		-b [MAC_ADDRESS]						Wakes machine using the passed MAC ADDRESS
-		-e [ALIAS] [MAC_ADDRESS]					Changes MAC_ADDRESS value of passed ALIAS to passed MAC_ADDRESS 
-		-g [STORED_ALIAS]							Fetches MAC ADDRESS bound to the passed ALIAS
-		-h								Help text
-		-l								Prints out all stored aliases along with their MAC_ADDRESSES
-		-s [ALIAS] [MAC_ADDRESS]					Binds the passed alias and saves it
+		-B [MAC_ADDRESS]						Wakes machine using the passed MAC ADDRESS
+		-E [ALIAS] [MAC_ADDRESS]					Changes MAC_ADDRESS value of passed ALIAS to passed MAC_ADDRESS 
+		-G [STORED_ALIAS]							Fetches MAC ADDRESS bound to the passed ALIAS
+		-R [STORED_ALIAS]							Removes the entire entry from database
+		-H								Help text
+		-L								Prints out all stored aliases along with their MAC_ADDRESSES
+		-S [ALIAS] [MAC_ADDRESS]					Binds the passed alias and saves it
 		-V								Prints version of the program
-		-w [ALIAS]							Wakes machine using the passed ALIAS
+		-W [ALIAS]							Wakes machine using the passed ALIAS
 `
 	return helpMessage
 }
@@ -33,8 +35,8 @@ func main() {
 	if len(os.Args)-1 == 0 {
 		fmt.Println(helpMessage())
 	} else {
-		switch os.Args[1] {
-		case "-s":
+		switch strings.ToUpper(os.Args[1]) {
+		case "-S":
 			var alias = os.Args[2]
 			var MAC = os.Args[3]
 			err := DB_Worker.StoreMachine(alias, MAC)
@@ -43,7 +45,7 @@ func main() {
 				os.Exit(1)
 			}
 			fmt.Println("Machine stored successfully")
-		case "-e":
+		case "-E":
 			var alias = os.Args[2]
 			var newMAC = os.Args[3]
 			err := DB_Worker.EditMachineDetails(alias, newMAC)
@@ -53,7 +55,7 @@ func main() {
 			}
 			fmt.Println("Machine edited successfully")
 
-		case "-w":
+		case "-W":
 			var alias = os.Args[2]
 			err := DB_Worker.WakeWithAlias(alias)
 			if err != nil {
@@ -61,7 +63,7 @@ func main() {
 				os.Exit(1)
 			}
 			fmt.Println("Waking " + alias + " ...")
-		case "-g":
+		case "-G":
 			var alias = os.Args[2]
 			Mac, err := DB_Worker.GetStoredMac(alias)
 			if err != nil {
@@ -69,7 +71,7 @@ func main() {
 				os.Exit(1)
 			}
 			fmt.Println(alias + " is tied to: " + Mac)
-		case "-b":
+		case "-B":
 			var MAC = os.Args[2]
 			packet, err := WoL_Worker.CreateMagicPacket(MAC)
 			if err != nil {
@@ -82,15 +84,23 @@ func main() {
 				os.Exit(1)
 			}
 			fmt.Println("Waking" + MAC + " ...")
-		case "-h":
+		default:
+			fallthrough
+		case "-R":
+			alias := os.Args[2]
+			err := DB_Worker.DeleteEntry(alias)
+			if err != nil {
+				fmt.Println("Error deleting entry: ", err)
+			}
+		case "-H":
 			fmt.Println(helpMessage())
-		case "-l":
-			err := DB_Worker.ListAllMachies()
+		case "-L":
+			err := DB_Worker.ListAllMachines()
 			if err != nil {
 				log.Println(err)
 				os.Exit(1)
 			}
-		case "-v":
+		case "-V":
 			fmt.Println(version)
 		}
 	}

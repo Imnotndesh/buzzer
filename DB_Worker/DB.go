@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tidwall/buntdb"
+	"log"
 	"strconv"
 )
 
@@ -97,7 +98,7 @@ func EditMachineDetails(alias string, MACstr string) error {
 	}
 	return nil
 }
-func ListAllMachies() error {
+func ListAllMachines() error {
 	db, err := initializeDB(dbName)
 	if err != nil {
 		return err
@@ -114,5 +115,21 @@ func ListAllMachies() error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+func DeleteEntry(alias string) error {
+	db, err := initializeDB(dbName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	err = db.Update(func(tx *buntdb.Tx) error {
+		_, err = tx.Delete(alias)
+		return err
+	})
+	if err != nil {
+		log.Fatal("Cannot delete pair: ", err)
+	}
+	log.Println("Entry removed successfully")
 	return nil
 }
