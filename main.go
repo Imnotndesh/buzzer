@@ -28,11 +28,11 @@ func getDBPath() (string, error) {
 }
 
 func main() {
-	dbpath, err := getDBPath()
+	dbPath, err := getDBPath()
 	if err != nil {
-		log.Fatalf("Could not get current data path")
+		log.Fatalf("Could not get or create database path: %v", err)
 	}
-	db, err := DB_Worker.New(dbpath)
+	db, err := DB_Worker.New(dbPath)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
@@ -173,11 +173,25 @@ func main() {
 					return db.DeleteEntry(alias)
 				},
 			},
+			// For Bash completions only
 			{
 				Name:   "list-raw",
 				Hidden: true,
 				Action: func(c *cli.Context) error {
 					return db.ListAllMachineAliases()
+				},
+			},
+			// For GoReleaser only
+			{
+				Name:   "generate-man-page",
+				Hidden: true,
+				Action: func(c *cli.Context) error {
+					man, err := c.App.ToMan()
+					if err != nil {
+						return err
+					}
+					fmt.Println(man)
+					return nil
 				},
 			},
 		},

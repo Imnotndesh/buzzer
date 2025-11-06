@@ -1,4 +1,4 @@
-# Buzzer
+# Overview
 
 **Buzzer** is a simple, fast, and convenient command-line tool for executing Wake-on-LAN (WoL) operations on your local network.
 
@@ -14,7 +14,7 @@
 
 ## Installation
 
-The easiest way to install `buzzer` is by downloading a pre-compiled package from the **GitHub Releases Page**.
+The easiest way to install `buzzer` is by downloading a pre-compiled package from [here](https://github.com/Imnotndesh/buzzer/releases).
 
 ### For Debian/Ubuntu
 
@@ -23,7 +23,7 @@ Download the `.deb` package and install it using `apt`.
 ```sh
 # Replace v1.x.x with the latest version
 wget https://github.com/Imnotndesh/buzzer/releases/download/v1.x.x/buzzer_1.x.x_linux_amd64.deb
-sudo apt install ./buzzer_1.x.x_linux_amd64.deb
+sudo apt install ./buzzer_x.x.x_linux_amd64.deb
 ```
 
 ### For Fedora/RHEL/CentOS
@@ -33,7 +33,7 @@ Download the `.rpm` package and install it using `dnf`.
 ```sh
 # Replace v1.x.x with the latest version
 wget https://github.com/Imnotndesh/buzzer/releases/download/v1.x.x/buzzer-1.x.x.x86_64.rpm
-sudo dnf install ./buzzer-1.x.x.x86_64.rpm
+sudo dnf install ./buzzer-x.x.x.x86_64.rpm
 ```
 
 ## Building from Source
@@ -47,18 +47,17 @@ go build -o buzzer .
 sudo mv buzzer /usr/local/bin/
 ```
 # Commands
-
-Buzzer uses case-insensitive flags to perform its functions.
+Buzzer uses a simple subcommand structure for its operations
 
 ---
 
-### `-S [ALIAS] [MAC_ADDRESS]`
+### `store [ALIAS] [MAC_ADDRESS]`
 
 **S**tores a new machine by associating a MAC address with a memorable alias.
 ```sh
   buzzer store my-server 0A:1B:2C:3D:4E:5F
 ```
-### `-W [ALIAS]`
+### `wake [ALIAS]`
 
 **W**akes a machine using its stored alias.
 
@@ -67,7 +66,7 @@ Buzzer uses case-insensitive flags to perform its functions.
 >```sh
 >  buzzer wake proxmox-server --via 10.0.0.255:7
 >```
-### `-B [MAC_ADDRESS]`
+### `broadcast [MAC_ADDRESS]`
 
 **B**roadcasts a Wake-on-LAN packet directly to a specific MAC address.
 
@@ -76,35 +75,35 @@ Buzzer uses case-insensitive flags to perform its functions.
 >```sh
 >  buzzer broadcast 0A:1B:2C:3D:4E:5F --via 10.0.0.255:7
 >```
-### `-L`
+### `list`
 
 **L**ists all stored aliases and their corresponding MAC addresses.
 ```sh
   buzzer list
 ```
-### `-G [ALIAS]`
+### `get [ALIAS]`
 
 **G**ets and displays the MAC address associated with a stored alias.
 ```sh
   buzzer get proxmox-server
 ```
-### `-E [ALIAS] [NEW_MAC_ADDRESS]`
+### `edit [ALIAS] [NEW_MAC_ADDRESS]`
 
 **E**dits an existing entry to assign a new MAC address to an alias.
 ```sh
   buzzer edit my-server F0:E1:D2:C3:B4:A5
 ```
-### `-R [ALIAS]`
+### `remove [ALIAS]`
 
 **R**emoves an alias and its MAC address from the database.
 ```sh
   buzzer remove my-server
 ```
-### `-H`
+### `help`
 
 Displays the **H**elp message with all available commands.
 ```sh
-  buzzer help
+  buzzer version
 ```
 ### `-V`
 Prints the current **V**ersion of the program.
