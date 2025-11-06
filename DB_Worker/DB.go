@@ -71,13 +71,11 @@ func (d *DB) WakeWithAlias(alias string) error {
 }
 
 // EditMachineDetails updates the MAC address for an existing alias.
-// BuntDB's Set function overwrites, so this is the same as StoreMachine.
 func (d *DB) EditMachineDetails(alias string, macStr string) error {
 	return d.StoreMachine(alias, macStr)
 }
 
 // ListAllMachines iterates through all entries and prints them.
-// Note: In a real app, you might return a slice instead of printing.
 func (d *DB) ListAllMachines() error {
 	return d.conn.View(func(tx *buntdb.Tx) error {
 		index := 0
@@ -101,4 +99,14 @@ func (d *DB) DeleteEntry(alias string) error {
 	}
 	log.Println("Entry removed successfully")
 	return nil
+}
+
+// ListAllMachineAliases iterates and prints only the alias keys, one per line.
+func (d *DB) ListAllMachineAliases() error {
+	return d.conn.View(func(tx *buntdb.Tx) error {
+		return tx.Ascend("", func(key, value string) bool {
+			fmt.Println(key)
+			return true
+		})
+	})
 }

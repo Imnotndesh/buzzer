@@ -93,5 +93,13 @@ func main() {
 			os.Exit(1)
 		}
 		fmt.Println("Waking " + MAC + " ...")
+	// Undocumented command for shell completion script
+	case "-L-RAW":
+		err := db.ListAllMachineAliases()
+		if err != nil {
+			// Output to stderr so it doesn't pollute the stdout for the script
+			log.Printf("completion error: %v", err)
+			os.Exit(1)
+		}
 	}
 }
