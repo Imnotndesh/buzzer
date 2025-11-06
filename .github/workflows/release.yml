@@ -23,6 +23,9 @@ jobs:
         with:
           go-version: '1.25'
 
+      - name: Generate man page
+        run: go run . generate-man-page > ./buzzer.1
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:

@@ -5,7 +5,6 @@ project_name: buzzer
 before:
   hooks:
     - go mod tidy
-    - go run . generate-man-page > ./buzzer.1
 
 builds:
   - id: buzzer
