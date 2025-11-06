@@ -11,7 +11,7 @@ _buzzer_completions() {
     prev_word="${COMP_WORDS[COMP_CWORD-1]}"
 
     # Define all possible subcommands
-    local commands="store edit wake get broadcast list remove"
+    local commands="store edit wake get broadcast list remove listen"
 
     # Define commands that expect a stored alias as the next argument
     local alias_commands="edit get wake remove"

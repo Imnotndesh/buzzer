@@ -92,13 +92,13 @@ Buzzer uses a simple subcommand structure for its operations
   buzzer edit my-server F0:E1:D2:C3:B4:A5
 ```
 
-### `Listen`
+### `listen`
 **L**istens for any wake on lan packets sent to a device (default port 9)
 
 
 > This can also take the argument `-port` to specify a port to listen to
 > ```shell
->    buzzer listen -port 30219
+>    buzzer listen --port 30219
 >```
 **NOTE**: By default this command needs privileged access by default unless a lower port number is specified
 ### `remove [ALIAS]`
