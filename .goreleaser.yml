@@ -31,7 +31,7 @@ nfpms:
       - src: ./buzzer-completion.bash
         dst: /usr/share/bash-completion/completions/buzzer
 
-      - src: "{{ .ProjectDir }}/buzzer.1"
+      - src: "./buzzer.1"
         dst: /usr/share/man/man1/buzzer.1
 
 checksum:
