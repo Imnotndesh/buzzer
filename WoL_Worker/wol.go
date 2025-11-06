@@ -86,3 +86,31 @@ func SendMagicPacket(macStr string, customAddr ...string) error {
 	}
 	return client.Send(packet)
 }
+
+// Listen starts a UDP listener on the given port and prints information about received packets.
+// It blocks until an error occurs (e.g., the listener is closed) or the process is terminated.
+func Listen(port int) error {
+	addr := fmt.Sprintf(":%d", port)
+	listener, err := net.ListenPacket("udp", addr)
+	if err != nil {
+		return fmt.Errorf("failed to start UDP listener on port %d: %w", port, err)
+	}
+	defer func(listener net.PacketConn) {
+		err := listener.Close()
+		if err != nil {
+			log.Printf("Error closing UDP listener: %v\n", err)
+		}
+	}(listener)
+
+	log.Printf("Listening for packets on UDP port %d... (Press Ctrl+C to stop)", port)
+
+	buffer := make([]byte, 1500)
+	for {
+		n, senderAddr, err := listener.ReadFrom(buffer)
+		if err != nil {
+			return fmt.Errorf("error reading from UDP: %w", err)
+		}
+
+		fmt.Printf("Received %d bytes from %s\n", n, senderAddr)
+	}
+}

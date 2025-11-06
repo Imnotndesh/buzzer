@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/urfave/cli/v2"
 )
@@ -171,6 +172,25 @@ func main() {
 					}
 					alias := c.Args().First()
 					return db.DeleteEntry(alias)
+				},
+			},
+			{
+				Name:  "listen",
+				Usage: "Listens for incoming WoL packets to help with testing",
+				Flags: []cli.Flag{
+					&cli.IntFlag{
+						Name:  "port",
+						Value: 9,
+						Usage: "Port to listen on",
+					},
+				},
+				Action: func(c *cli.Context) error {
+					port := c.Int("port")
+					err := WoL_Worker.Listen(port)
+					if err != nil && port < 1024 && strings.Contains(err.Error(), "permission denied") {
+						return cli.Exit(fmt.Sprintf("Permission denied to bind to port %d. Try running with sudo. or changing the port using -port modifier", port), 1)
+					}
+					return err
 				},
 			},
 			// For Bash completions only

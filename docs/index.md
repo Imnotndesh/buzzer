@@ -61,7 +61,6 @@ Buzzer uses a simple subcommand structure for its operations
 
 **W**akes a machine using its stored alias.
 
->[!Note]
 > You can also specify a custom broadcast address using the `--via` flag:
 >```sh
 >  buzzer wake proxmox-server --via 10.0.0.255:7
@@ -70,7 +69,6 @@ Buzzer uses a simple subcommand structure for its operations
 
 **B**roadcasts a Wake-on-LAN packet directly to a specific MAC address.
 
->[!Note]
 > You can also specify a custom broadcast address using the `--via` flag:
 >```sh
 >  buzzer broadcast 0A:1B:2C:3D:4E:5F --via 10.0.0.255:7
@@ -93,6 +91,16 @@ Buzzer uses a simple subcommand structure for its operations
 ```sh
   buzzer edit my-server F0:E1:D2:C3:B4:A5
 ```
+
+### `Listen`
+**L**istens for any wake on lan packets sent to a device (default port 9)
+
+
+> This can also take the argument `-port` to specify a port to listen to
+> ```shell
+>    buzzer listen -port 30219
+>```
+**NOTE**: By default this command needs privileged access by default unless a lower port number is specified
 ### `remove [ALIAS]`
 
 **R**emoves an alias and its MAC address from the database.
