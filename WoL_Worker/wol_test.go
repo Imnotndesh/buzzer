@@ -52,3 +52,41 @@ func TestSendMagicPacket_Integration(t *testing.T) {
 		t.Logf("Received: %x", receivedPacket)
 	}
 }
+
+func TestSendMagicPacket_WithCustomAddr(t *testing.T) {
+	const testMAC = "AA:BB:CC:DD:EE:FF"
+
+	// 1. Set up a listener on a random port.
+	listener, err := net.ListenPacket("udp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("Failed to set up UDP listener: %v", err)
+	}
+	defer listener.Close()
+	listenerAddr := listener.LocalAddr().String()
+	t.Logf("Test listener for custom address running on %s", listenerAddr)
+
+	// 2. Use the convenience function with the custom address.
+	// This directly tests the logic used by the --via flag.
+	sendErrChan := make(chan error, 1)
+	go func() {
+		sendErrChan <- SendMagicPacket(testMAC, listenerAddr)
+	}()
+
+	// 3. Wait for the packet.
+	if err := listener.SetReadDeadline(time.Now().Add(2 * time.Second)); err != nil {
+		t.Fatalf("Failed to set read deadline: %v", err)
+	}
+	receivedBuf := make([]byte, 1024)
+	n, _, err := listener.ReadFrom(receivedBuf)
+	if err != nil {
+		t.Fatalf("Failed to read from UDP listener: %v", err)
+	}
+
+	// 4. Verify the results.
+	if sendErr := <-sendErrChan; sendErr != nil {
+		t.Fatalf("SendMagicPacket failed: %v", sendErr)
+	}
+	if n != 102 {
+		t.Errorf("expected to receive 102 bytes, but got %d", n)
+	}
+}

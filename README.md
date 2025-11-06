@@ -1,21 +1,21 @@
 # Buzzer
-An uncomplicated Wake On Lan Program  
-Full documentation is located [Here](https://imnotndesh.github.io/buzzer/)
 
-# Usage
-- On linux
-```./buzzer [OPTIONS] [MAC_ADDRESS] [IP_ADDRESS]```
+**Buzzer** is a simple, fast, and convenient command-line tool for executing Wake-on-LAN (WoL) operations on your local network.
 
-- On Windows
-  ```./buzzer.exe [OPTIONS] [MAC_ADDRESS] [IP_ADDRESS]```
-## Commands
-| Flag | Usage                        | Description                                           |
-|------|------------------------------|-------------------------------------------------------|
-| -b   | -b [ MACHINE_MAC ]           | Wakes a machine using the passed MAC address          |
-| -e   | -e [ ALIAS ] [ MAC_ADDRESS ] | Changes MAC_ADDRESS value for the passed ALIAS        |
-| -g   | -g [ STORED_ALIAS ]          | Fetches MAC address bound to the alias                |
-| -h   | -h                           | Prints out the help text                              |
-| -l   | -l                           | Prints out all stored aliases and their bound MAC_ADDRESS |
-| -s   | -s [ ALIAS ] [ MACHINE_MAC ] | Binds MAC address to an alias and stores it           |
-| -v   | -v                           | Shows current version                                 |
-| -w   | -w [ STORED_ALIAS ]          | Wakes computer using its stored alias name            |
+For full installation and usage instructions, please see the **[Full Documentation](https://imnotndesh.github.io/buzzer/)**.
+
+## Quick Example
+
+```sh
+# Store a machine's MAC address with an easy-to-remember alias
+buzzer store my-server 0A:1B:2C:3D:4E:5F
+
+# Wake the machine using the alias
+buzzer wake my-server
+
+# Wake a machine on a different subnet using a custom broadcast address
+buzzer wake my-server --via 192.168.2.255:9
+
+# List all stored machines
+buzzer list
+```

@@ -62,12 +62,12 @@ func (d *DB) GetStoredMac(alias string) (MAC string, err error) {
 }
 
 // WakeWithAlias retrieves a MAC from the DB and sends a WoL packet.
-func (d *DB) WakeWithAlias(alias string) error {
+func (d *DB) WakeWithAlias(alias string, customAddr ...string) error {
 	mac, err := d.GetStoredMac(alias)
 	if err != nil {
 		return fmt.Errorf("unable to get stored mac for alias %q: %w", alias, err)
 	}
-	return WoL_Worker.SendMagicPacket(mac)
+	return WoL_Worker.SendMagicPacket(mac, customAddr...)
 }
 
 // EditMachineDetails updates the MAC address for an existing alias.

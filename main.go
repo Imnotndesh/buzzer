@@ -89,12 +89,20 @@ func main() {
 				Aliases:   []string{"w"},
 				Usage:     "Wakes a machine using its stored alias",
 				ArgsUsage: "[ALIAS]",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:  "via",
+						Usage: "Specify a custom broadcast address (e.g., 192.168.1.255:9)",
+					},
+				},
 				Action: func(c *cli.Context) error {
 					if c.NArg() < 1 {
 						return cli.ShowSubcommandHelp(c)
 					}
 					alias := c.Args().First()
-					if err := db.WakeWithAlias(alias); err != nil {
+					// Pass the custom address if the --via flag is used
+					customAddr := c.String("via")
+					if err := db.WakeWithAlias(alias, customAddr); err != nil {
 						return cli.Exit(fmt.Sprintf("Error waking %q: %v", alias, err), 1)
 					}
 					fmt.Printf("Waking %s ...\n", alias)
@@ -124,12 +132,20 @@ func main() {
 				Aliases:   []string{"b"},
 				Usage:     "Wakes a machine directly via its MAC address (Broadcast)",
 				ArgsUsage: "[MAC_ADDRESS]",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:  "via",
+						Usage: "Specify a custom broadcast address (e.g., 192.168.1.255:9)",
+					},
+				},
 				Action: func(c *cli.Context) error {
 					if c.NArg() < 1 {
 						return cli.ShowSubcommandHelp(c)
 					}
 					mac := c.Args().First()
-					if err := WoL_Worker.SendMagicPacket(mac); err != nil {
+					// Pass the custom address if the --via flag is used
+					customAddr := c.String("via")
+					if err := WoL_Worker.SendMagicPacket(mac, customAddr); err != nil {
 						return cli.Exit(fmt.Sprintf("Error sending magic packet: %v", err), 1)
 					}
 					fmt.Printf("Waking %s ...\n", mac)

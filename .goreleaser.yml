@@ -17,12 +17,15 @@ builds:
       - amd64
       - arm64
 
+manpages:
+  - binary: buzzer
+    section: 1
+
 nfpms:
   - id: buzzer-packages
     formats:
       - deb
       - rpm
-    # Package metadata.
     vendor: "Brian"
     homepage: "https://github.com/Imnotndesh/buzzer"
     maintainer: "Brian <slateinbox@gmail.com>"
@@ -32,6 +35,8 @@ nfpms:
     contents:
       - src: ./buzzer-completion.bash
         dst: /usr/share/bash-completion/completions/buzzer
+      - src: ./dist/buzzer.1.gz
+        dst: /usr/share/man/man1/buzzer.1.gz
 
 checksum:
   name_template: 'checksums.txt'

@@ -75,10 +75,14 @@ func (c *Client) Send(p Packet) error {
 
 // SendMagicPacket is a convenience function that creates and sends a magic packet
 // to the default broadcast address.
-func SendMagicPacket(macStr string) error {
+func SendMagicPacket(macStr string, customAddr ...string) error {
 	packet, err := CreateMagicPacket(macStr)
 	if err != nil {
 		return err
 	}
-	return NewClient().Send(packet)
+	client := NewClient()
+	if len(customAddr) > 0 && customAddr[0] != "" {
+		client.WithBroadcastAddr(customAddr[0])
+	}
+	return client.Send(packet)
 }

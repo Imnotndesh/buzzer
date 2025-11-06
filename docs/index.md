@@ -55,35 +55,64 @@ Buzzer uses case-insensitive flags to perform its functions.
 ### `-S [ALIAS] [MAC_ADDRESS]`
 
 **S**tores a new machine by associating a MAC address with a memorable alias.
-
+```sh
+  buzzer store my-server 0A:1B:2C:3D:4E:5F
+```
 ### `-W [ALIAS]`
 
 **W**akes a machine using its stored alias.
 
+>[!Note]
+> You can also specify a custom broadcast address using the `--via` flag:
+>```sh
+>  buzzer wake proxmox-server --via 10.0.0.255:7
+>```
 ### `-B [MAC_ADDRESS]`
 
 **B**roadcasts a Wake-on-LAN packet directly to a specific MAC address.
 
+>[!Note]
+> You can also specify a custom broadcast address using the `--via` flag:
+>```sh
+>  buzzer broadcast 0A:1B:2C:3D:4E:5F --via 10.0.0.255:7
+>```
 ### `-L`
 
 **L**ists all stored aliases and their corresponding MAC addresses.
-
+```sh
+  buzzer list
+```
 ### `-G [ALIAS]`
 
 **G**ets and displays the MAC address associated with a stored alias.
-
+```sh
+  buzzer get proxmox-server
+```
 ### `-E [ALIAS] [NEW_MAC_ADDRESS]`
 
 **E**dits an existing entry to assign a new MAC address to an alias.
-
+```sh
+  buzzer edit my-server F0:E1:D2:C3:B4:A5
+```
 ### `-R [ALIAS]`
 
 **R**emoves an alias and its MAC address from the database.
-
+```sh
+  buzzer remove my-server
+```
 ### `-H`
 
 Displays the **H**elp message with all available commands.
-
+```sh
+  buzzer help
+```
 ### `-V`
-
 Prints the current **V**ersion of the program.
+```sh
+  buzzer version
+```
+
+> The same information can be found in the man pages in linux which can be run using command:
+> ```shell
+> man 1 buzzer
+>```
