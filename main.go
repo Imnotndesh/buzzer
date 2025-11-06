@@ -6,34 +6,33 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
+	"path/filepath"
+
+	"github.com/urfave/cli/v2"
 )
 
 const (
-	version = "v1.0.0"
-	dbPath  = ".machines"
+	version = "v1.2.0"
 )
 
-func helpMessage() string {
-	helpMessage := `
-	Usage: 
-		buzzer [options]
-	
-	Options:
-		-B [MAC_ADDRESS]						Wakes machine using the passed MAC ADDRESS
-		-E [ALIAS] [MAC_ADDRESS]					Changes MAC_ADDRESS value of passed ALIAS to passed MAC_ADDRESS 
-		-G [STORED_ALIAS]							Fetches MAC ADDRESS bound to the passed ALIAS
-		-R [STORED_ALIAS]							Removes the entire entry from database
-		-H								Help text
-		-L								Prints out all stored aliases along with their MAC_ADDRESSES
-		-S [ALIAS] [MAC_ADDRESS]					Binds the passed alias and saves it
-		-V								Prints version of the program
-		-W [ALIAS]							Wakes machine using the passed ALIAS
-`
-	return helpMessage
+func getDBPath() (string, error) {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return "", fmt.Errorf("could not get user config directory: %w", err)
+	}
+	buzzerDir := filepath.Join(configDir, "buzzer")
+	if err := os.MkdirAll(buzzerDir, 0755); err != nil {
+		return "", fmt.Errorf("could not create config directory %q: %w", buzzerDir, err)
+	}
+	return filepath.Join(buzzerDir, ".machines"), nil
 }
+
 func main() {
-	db, err := DB_Worker.New(dbPath)
+	dbpath, err := getDBPath()
+	if err != nil {
+		log.Println("Could not get current data path")
+	}
+	db, err := DB_Worker.New(dbpath)
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
@@ -44,62 +43,131 @@ func main() {
 		}
 	}(db)
 
-	if len(os.Args)-1 == 0 {
-		fmt.Println(helpMessage())
-		return
+	app := &cli.App{
+		Name:    "buzzer",
+		Usage:   "A simple Wake-on-LAN (WoL) command-line tool",
+		Version: version,
+		Commands: []*cli.Command{
+			{
+				Name:      "store",
+				Aliases:   []string{"s"},
+				Usage:     "Saves or stores a MAC address with a memorable alias",
+				ArgsUsage: "[ALIAS] [MAC_ADDRESS]",
+				Action: func(c *cli.Context) error {
+					if c.NArg() < 2 {
+						return cli.ShowSubcommandHelp(c)
+					}
+					alias := c.Args().Get(0)
+					mac := c.Args().Get(1)
+					if err := db.StoreMachine(alias, mac); err != nil {
+						return cli.Exit(fmt.Sprintf("Error storing machine: %v", err), 1)
+					}
+					fmt.Println("Machine stored successfully")
+					return nil
+				},
+			},
+			{
+				Name:      "edit",
+				Aliases:   []string{"e"},
+				Usage:     "Edits an existing entry to assign a new MAC address to an alias",
+				ArgsUsage: "[ALIAS] [NEW_MAC_ADDRESS]",
+				Action: func(c *cli.Context) error {
+					if c.NArg() < 2 {
+						return cli.ShowSubcommandHelp(c)
+					}
+					alias := c.Args().Get(0)
+					newMAC := c.Args().Get(1)
+					if err := db.EditMachineDetails(alias, newMAC); err != nil {
+						return cli.Exit(fmt.Sprintf("Error editing machine: %v", err), 1)
+					}
+					fmt.Println("Machine edited successfully")
+					return nil
+				},
+			},
+			{
+				Name:      "wake",
+				Aliases:   []string{"w"},
+				Usage:     "Wakes a machine using its stored alias",
+				ArgsUsage: "[ALIAS]",
+				Action: func(c *cli.Context) error {
+					if c.NArg() < 1 {
+						return cli.ShowSubcommandHelp(c)
+					}
+					alias := c.Args().First()
+					if err := db.WakeWithAlias(alias); err != nil {
+						return cli.Exit(fmt.Sprintf("Error waking %q: %v", alias, err), 1)
+					}
+					fmt.Printf("Waking %s ...\n", alias)
+					return nil
+				},
+			},
+			{
+				Name:      "get",
+				Aliases:   []string{"g"},
+				Usage:     "Gets and displays the MAC address associated with a stored alias",
+				ArgsUsage: "[ALIAS]",
+				Action: func(c *cli.Context) error {
+					if c.NArg() < 1 {
+						return cli.ShowSubcommandHelp(c)
+					}
+					alias := c.Args().First()
+					mac, err := db.GetStoredMac(alias)
+					if err != nil {
+						return cli.Exit(fmt.Sprintf("Error getting stored mac: %v", err), 1)
+					}
+					fmt.Printf("%s is tied to: %s\n", alias, mac)
+					return nil
+				},
+			},
+			{
+				Name:      "broadcast",
+				Aliases:   []string{"b"},
+				Usage:     "Wakes a machine directly via its MAC address (Broadcast)",
+				ArgsUsage: "[MAC_ADDRESS]",
+				Action: func(c *cli.Context) error {
+					if c.NArg() < 1 {
+						return cli.ShowSubcommandHelp(c)
+					}
+					mac := c.Args().First()
+					if err := WoL_Worker.SendMagicPacket(mac); err != nil {
+						return cli.Exit(fmt.Sprintf("Error sending magic packet: %v", err), 1)
+					}
+					fmt.Printf("Waking %s ...\n", mac)
+					return nil
+				},
+			},
+			{
+				Name:    "list",
+				Aliases: []string{"l"},
+				Usage:   "Lists all stored aliases and their corresponding MAC addresses",
+				Action: func(c *cli.Context) error {
+					return db.ListAllMachines()
+				},
+			},
+			{
+				Name:      "remove",
+				Aliases:   []string{"r"},
+				Usage:     "Removes an alias and its MAC address from the database",
+				ArgsUsage: "[ALIAS]",
+				Action: func(c *cli.Context) error {
+					if c.NArg() < 1 {
+						return cli.ShowSubcommandHelp(c)
+					}
+					alias := c.Args().First()
+					return db.DeleteEntry(alias)
+				},
+			},
+			{
+				Name:   "list-raw",
+				Hidden: true,
+				Action: func(c *cli.Context) error {
+					return db.ListAllMachineAliases()
+				},
+			},
+		},
 	}
 
-	switch strings.ToUpper(os.Args[1]) {
-	case "-S":
-		var alias = os.Args[2]
-		var MAC = os.Args[3]
-		err := db.StoreMachine(alias, MAC)
-		if err != nil {
-			log.Println("Error storing machine: ", err)
-			os.Exit(1)
-		}
-		fmt.Println("Machine stored successfully")
-	case "-E":
-		var alias = os.Args[2]
-		var newMAC = os.Args[3]
-		err := db.EditMachineDetails(alias, newMAC)
-		if err != nil {
-			log.Println("Error editing machine: ", err)
-			os.Exit(1)
-		}
-		fmt.Println("Machine edited successfully")
-
-	case "-W":
-		var alias = os.Args[2]
-		err := db.WakeWithAlias(alias)
-		if err != nil {
-			log.Println("Error waking "+alias+": ", err)
-			os.Exit(1)
-		}
-		fmt.Println("Waking " + alias + " ...")
-	case "-G":
-		var alias = os.Args[2]
-		mac, err := db.GetStoredMac(alias)
-		if err != nil {
-			log.Println("Error getting stored mac: ", err)
-			os.Exit(1)
-		}
-		fmt.Println(alias + " is tied to: " + mac)
-	case "-B":
-		var MAC = os.Args[2]
-		err := WoL_Worker.SendMagicPacket(MAC)
-		if err != nil {
-			log.Println("Error sending magic packet: ", err)
-			os.Exit(1)
-		}
-		fmt.Println("Waking " + MAC + " ...")
-	// Undocumented command for shell completion script
-	case "-L-RAW":
-		err := db.ListAllMachineAliases()
-		if err != nil {
-			// Output to stderr so it doesn't pollute the stdout for the script
-			log.Printf("completion error: %v", err)
-			os.Exit(1)
-		}
+	if err := app.Run(os.Args); err != nil {
+		log.Fatal(err)
 	}
 }
