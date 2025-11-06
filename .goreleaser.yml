@@ -1,4 +1,6 @@
 # This is the configuration file for GoReleaser.
+version: 2
+
 project_name: buzzer
 
 before:
@@ -17,8 +19,6 @@ builds:
 
 nfpms:
   - id: buzzer-packages
-    builds:
-      - buzzer
     formats:
       - deb
       - rpm

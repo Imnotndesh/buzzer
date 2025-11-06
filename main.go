@@ -30,7 +30,7 @@ func getDBPath() (string, error) {
 func main() {
 	dbpath, err := getDBPath()
 	if err != nil {
-		log.Println("Could not get current data path")
+		log.Fatalf("Could not get current data path")
 	}
 	db, err := DB_Worker.New(dbpath)
 	if err != nil {

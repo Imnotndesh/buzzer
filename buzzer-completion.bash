@@ -10,27 +10,25 @@ _buzzer_completions() {
     cur_word="${COMP_WORDS[COMP_CWORD]}"
     prev_word="${COMP_WORDS[COMP_CWORD-1]}"
 
-    # Define all possible flags
-    local flags="-B -E -G -R -H -L -S -V -W"
+    # Define all possible subcommands
+    local commands="store edit wake get broadcast list remove"
 
-    # Define flags that expect a stored alias as the next argument
-    local alias_flags="-E -G -R -W"
+    # Define commands that expect a stored alias as the next argument
+    local alias_commands="edit get wake remove"
 
-    # If the previous word is one of the alias flags, we need to complete with an alias.
-    if [[ " ${alias_flags} " =~ " ${prev_word} " ]]; then
+    # If the previous word is one of the alias commands, we need to complete with an alias.
+    if [[ " ${alias_commands} " =~ " ${prev_word} " ]]; then
         # Use our hidden command to get a list of aliases from the database.
         local aliases
-        aliases=$(buzzer -L-RAW 2>/dev/null)
+        aliases=$(buzzer list-raw 2>/dev/null)
         # Use compgen to filter aliases based on the current word.
         COMPREPLY=($(compgen -W "${aliases}" -- "${cur_word}"))
         return 0
     fi
 
-    # Otherwise, if we are completing the first argument (a flag), show all flags.
-    if [[ ${cur_word} == -* ]]; then
-        COMPREPLY=($(compgen -W "${flags}" -- "${cur_word}"))
-        return 0
-    fi
+    # Otherwise, complete with one of the subcommands
+    COMPREPLY=($(compgen -W "${commands}" -- "${cur_word}"))
+    return 0
 }
 
 # Register the completion function for the 'buzzer' command.
