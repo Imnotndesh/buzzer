@@ -16,10 +16,9 @@ builds:
     goarch:
       - amd64
       - arm64
-
-manpages:
-  - binary: buzzer
-    section: 1
+    manpages:
+      - binary: buzzer
+        section: 1
 
 nfpms:
   - id: buzzer-packages
