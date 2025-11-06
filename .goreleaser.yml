@@ -4,6 +4,7 @@ project_name: buzzer
 
 before:
   hooks:
+    - go run main.go generate-man-pages > buzzer.1
     - go mod tidy
 
 builds:
@@ -26,9 +27,6 @@ nfpms:
     maintainer: "Brian <slateinbox@gmail.com>"
     description: "A simple Wake-on-LAN (WoL) command-line tool."
     license: "GPLv3"
-
-    hooks:
-      pre: go run . generate-man-page > ./buzzer.1
 
     contents:
       - src: ./buzzer-completion.bash
