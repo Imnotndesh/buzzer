@@ -2,133 +2,102 @@ package DB_Worker
 
 import (
 	"buzzer/WoL_Worker"
-	"errors"
 	"fmt"
-	"github.com/tidwall/buntdb"
 	"log"
 	"strconv"
+
+	"github.com/tidwall/buntdb"
 )
 
-type machine struct {
-	Alias string
-	MAC   string
+//type machine struct {
+//	Alias string
+//	MAC   string
+//}
+
+// DB manages interactions with the buntdb database.
+type DB struct {
+	conn *buntdb.DB
 }
 
-func initializeDB(DBname string) (db *buntdb.DB, err error) {
-	db, err = buntdb.Open(DBname)
+// New opens a database at the given path and returns a new DB instance.
+func New(path string) (*DB, error) {
+	conn, err := buntdb.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	return
+	return &DB{conn: conn}, nil
 }
 
-const (
-	dbName string = ".machines"
-)
-
-func StoreMachine(alias string, MACstr string) error {
-	newMachine := machine{alias, MACstr}
-	fmt.Println("Machine " + newMachine.Alias + " Stored with details { " + newMachine.MAC + " }")
-	db, err := initializeDB(dbName)
-	defer func(db *buntdb.DB) {
-		err := db.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(db)
-	if err != nil {
-		return errors.New("failed to initialize DB")
+// Close closes the database connection.
+func (d *DB) Close() error {
+	if d.conn != nil {
+		return d.conn.Close()
 	}
-	err = db.Update(func(tx *buntdb.Tx) error {
-		_, _, err := tx.Set(newMachine.Alias, newMachine.MAC, nil)
-		return err
-	})
 	return nil
 }
-func GetStoredMac(alias string) (MAC string, err error) {
-	var MACstr string
-	db, err := initializeDB(dbName)
-	if err != nil {
-		return "", err
-	}
-	err = db.View(func(tx *buntdb.Tx) error {
+
+// StoreMachine saves a new alias and MAC address to the database.
+func (d *DB) StoreMachine(alias string, macStr string) error {
+	return d.conn.Update(func(tx *buntdb.Tx) error {
+		_, _, err := tx.Set(alias, macStr, nil)
+		return err
+	})
+}
+
+// GetStoredMac retrieves a MAC address for a given alias.
+func (d *DB) GetStoredMac(alias string) (MAC string, err error) {
+	var macStr string
+	err = d.conn.View(func(tx *buntdb.Tx) error {
 		val, err := tx.Get(alias)
 		if err != nil {
 			return err
 		}
-		MACstr = val
+		macStr = val
 		return nil
 	})
 	if err != nil {
 		return "", err
 	}
-	return MACstr, err
+	return macStr, err
 }
-func WakeWithAlias(alias string) error {
-	Mac, err := GetStoredMac(alias)
+
+// WakeWithAlias retrieves a MAC from the DB and sends a WoL packet.
+func (d *DB) WakeWithAlias(alias string) error {
+	mac, err := d.GetStoredMac(alias)
 	if err != nil {
-		return errors.New("unable to get stored mac")
+		return fmt.Errorf("unable to get stored mac for alias %q: %w", alias, err)
 	}
-	packet, err := WoL_Worker.CreateMagicPacket(Mac)
-	if err != nil {
-		return errors.New("unable to create packet")
-	}
-	err = packet.Send()
-	if err != nil {
-		return errors.New("unable to send packet")
-	}
-	return nil
+	return WoL_Worker.SendMagicPacket(mac)
 }
-func EditMachineDetails(alias string, MACstr string) error {
-	newMachine := machine{alias, MACstr}
-	db, err := initializeDB(dbName)
-	if err != nil {
-		return err
-	}
-	err = db.Update(func(tx *buntdb.Tx) error {
-		_, err := tx.Delete(newMachine.Alias)
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-	err = StoreMachine(newMachine.Alias, newMachine.MAC)
-	if err != nil {
-		return err
-	}
-	return nil
+
+// EditMachineDetails updates the MAC address for an existing alias.
+// BuntDB's Set function overwrites, so this is the same as StoreMachine.
+func (d *DB) EditMachineDetails(alias string, macStr string) error {
+	return d.StoreMachine(alias, macStr)
 }
-func ListAllMachines() error {
-	db, err := initializeDB(dbName)
-	if err != nil {
-		return err
-	}
-	err = db.View(func(tx *buntdb.Tx) error {
-		var index int = 0
-		err = tx.Ascend("", func(key, value string) bool {
+
+// ListAllMachines iterates through all entries and prints them.
+// Note: In a real app, you might return a slice instead of printing.
+func (d *DB) ListAllMachines() error {
+	return d.conn.View(func(tx *buntdb.Tx) error {
+		index := 0
+		err := tx.Ascend("", func(key, value string) bool {
 			fmt.Println(strconv.Itoa(index) + "----------\n" + "Alias : " + key + "\n" + "MAC_ADDRESS: " + value)
-			index += 1
+			index++
 			return true
 		})
 		return err
 	})
-	if err != nil {
-		return err
-	}
-	return nil
 }
-func DeleteEntry(alias string) error {
-	db, err := initializeDB(dbName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-	err = db.Update(func(tx *buntdb.Tx) error {
-		_, err = tx.Delete(alias)
+
+// DeleteEntry removes an entry from the database by its alias.
+func (d *DB) DeleteEntry(alias string) error {
+	err := d.conn.Update(func(tx *buntdb.Tx) error {
+		_, err := tx.Delete(alias)
 		return err
 	})
 	if err != nil {
-		log.Fatal("Cannot delete pair: ", err)
+		return fmt.Errorf("cannot delete pair for alias %q: %w", alias, err)
 	}
 	log.Println("Entry removed successfully")
 	return nil
