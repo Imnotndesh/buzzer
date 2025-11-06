@@ -1,3 +1,19 @@
 site_name: Buzzer Documentation
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    - navigation.tabs
+
 copyright:
-  &copy 2024 <a href="https://github.com/Imnotndesh" target="_blank">Brian Ndegwa</a>
+  &copy 2024 <a href="https://github.com/Imnotndesh" target="_blank">Brian Njoroge</a>

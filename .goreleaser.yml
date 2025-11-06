@@ -1,0 +1,37 @@
+# This is the configuration file for GoReleaser.
+project_name: buzzer
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: buzzer
+    main: ./main.go
+    binary: buzzer
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+nfpms:
+  - id: buzzer-packages
+    builds:
+      - buzzer
+    formats:
+      - deb
+      - rpm
+    # Package metadata.
+    vendor: "Brian"
+    homepage: "https://github.com/Imnotndesh/buzzer"
+    maintainer: "Brian <slateinbox@gmail.com>"
+    description: "A simple Wake-on-LAN (WoL) command-line tool."
+    license: "GPLv3"
+
+    contents:
+      - src: ./buzzer-completion.bash
+        dst: /usr/share/bash-completion/completions/buzzer
+
+checksum:
+  name_template: 'checksums.txt'

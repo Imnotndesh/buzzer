@@ -11,6 +11,7 @@ import (
 
 const (
 	version = "v1.0.0"
+	dbPath  = ".machines"
 )
 
 func helpMessage() string {
@@ -32,76 +33,73 @@ func helpMessage() string {
 	return helpMessage
 }
 func main() {
+	db, err := DB_Worker.New(dbPath)
+	if err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+	defer func(db *DB_Worker.DB) {
+		err := db.Close()
+		if err != nil {
+			log.Fatalf("Failed to close database: %v", err)
+		}
+	}(db)
+
 	if len(os.Args)-1 == 0 {
 		fmt.Println(helpMessage())
-	} else {
-		switch strings.ToUpper(os.Args[1]) {
-		case "-S":
-			var alias = os.Args[2]
-			var MAC = os.Args[3]
-			err := DB_Worker.StoreMachine(alias, MAC)
-			if err != nil {
-				log.Println("Error storing machine: ", err)
-				os.Exit(1)
-			}
-			fmt.Println("Machine stored successfully")
-		case "-E":
-			var alias = os.Args[2]
-			var newMAC = os.Args[3]
-			err := DB_Worker.EditMachineDetails(alias, newMAC)
-			if err != nil {
-				log.Println("Error editing machine: ", err)
-				os.Exit(1)
-			}
-			fmt.Println("Machine edited successfully")
+		return
+	}
 
-		case "-W":
-			var alias = os.Args[2]
-			err := DB_Worker.WakeWithAlias(alias)
-			if err != nil {
-				log.Println("Error waking "+alias+": ", err)
-				os.Exit(1)
-			}
-			fmt.Println("Waking " + alias + " ...")
-		case "-G":
-			var alias = os.Args[2]
-			Mac, err := DB_Worker.GetStoredMac(alias)
-			if err != nil {
-				log.Println("Error getting stored mac: ", err)
-				os.Exit(1)
-			}
-			fmt.Println(alias + " is tied to: " + Mac)
-		case "-B":
-			var MAC = os.Args[2]
-			packet, err := WoL_Worker.CreateMagicPacket(MAC)
-			if err != nil {
-				log.Println("Error creating magic packet: ", err)
-				os.Exit(1)
-			}
-			err = packet.Send()
-			if err != nil {
-				log.Println("Error sending magic packet: ", err)
-				os.Exit(1)
-			}
-			fmt.Println("Waking" + MAC + " ...")
-		default:
-			fallthrough
-		case "-R":
-			alias := os.Args[2]
-			err := DB_Worker.DeleteEntry(alias)
-			if err != nil {
-				fmt.Println("Error deleting entry: ", err)
-			}
-		case "-H":
-			fmt.Println(helpMessage())
-		case "-L":
-			err := DB_Worker.ListAllMachines()
-			if err != nil {
-				log.Println(err)
-				os.Exit(1)
-			}
-		case "-V":
-			fmt.Println(version)
+	switch strings.ToUpper(os.Args[1]) {
+	case "-S":
+		var alias = os.Args[2]
+		var MAC = os.Args[3]
+		err := db.StoreMachine(alias, MAC)
+		if err != nil {
+			log.Println("Error storing machine: ", err)
+			os.Exit(1)
+		}
+		fmt.Println("Machine stored successfully")
+	case "-E":
+		var alias = os.Args[2]
+		var newMAC = os.Args[3]
+		err := db.EditMachineDetails(alias, newMAC)
+		if err != nil {
+			log.Println("Error editing machine: ", err)
+			os.Exit(1)
+		}
+		fmt.Println("Machine edited successfully")
+
+	case "-W":
+		var alias = os.Args[2]
+		err := db.WakeWithAlias(alias)
+		if err != nil {
+			log.Println("Error waking "+alias+": ", err)
+			os.Exit(1)
+		}
+		fmt.Println("Waking " + alias + " ...")
+	case "-G":
+		var alias = os.Args[2]
+		mac, err := db.GetStoredMac(alias)
+		if err != nil {
+			log.Println("Error getting stored mac: ", err)
+			os.Exit(1)
+		}
+		fmt.Println(alias + " is tied to: " + mac)
+	case "-B":
+		var MAC = os.Args[2]
+		err := WoL_Worker.SendMagicPacket(MAC)
+		if err != nil {
+			log.Println("Error sending magic packet: ", err)
+			os.Exit(1)
+		}
+		fmt.Println("Waking " + MAC + " ...")
+	// Undocumented command for shell completion script
+	case "-L-RAW":
+		err := db.ListAllMachineAliases()
+		if err != nil {
+			// Output to stderr so it doesn't pollute the stdout for the script
+			log.Printf("completion error: %v", err)
+			os.Exit(1)
 		}
 	}
 }

@@ -1,39 +1,89 @@
-# Introduction
-Buzzer is a CLI application that is intended to be a tool for executing Wake on LAN operations on your local network.
+# Buzzer
+
+**Buzzer** is a simple, fast, and convenient command-line tool for executing Wake-on-LAN (WoL) operations on your local network.
 
 # Features
-* Storage of MAC addresses under aliases for better management
-* Convenient Flag based execution style that is suitable for scripting
-* Alias management tools for deleting and editing stored mac address and alias pairs
 
-# Getting Started  
+*   **Wake by MAC or Alias**: Send WoL packets directly to a MAC address or to a pre-saved alias.
+*   **Alias Management**: Store, edit, and delete MAC addresses under easy-to-remember aliases.
+*   **Script-Friendly**: Designed with a simple flag-based interface perfect for automation and scripting.
+*   **Cross-Platform**: Single binary that runs on Linux.
+*   **Auto-Completion**: Includes a bash completion script for a smoother terminal experience.
+
+# Getting Started
+
 ## Installation
-Fetch the latest release from [Releases Page](https://github.com/Imnotndesh/buzzer/releases)  
-From the download Location open a terminal and run the program using the command `./buzzer`
-## Building from Source
-Make sure You have golang installed in your system then execute the following:
+
+The easiest way to install `buzzer` is by downloading a pre-compiled package from the **GitHub Releases Page**.
+
+### For Debian/Ubuntu
+
+Download the `.deb` package and install it using `apt`.
+
+```sh
+# Replace v1.x.x with the latest version
+wget https://github.com/Imnotndesh/buzzer/releases/download/v1.x.x/buzzer_1.x.x_linux_amd64.deb
+sudo apt install ./buzzer_1.x.x_linux_amd64.deb
 ```
-git clone 'https://github.com/Imnotndesh/buzzer.git'
-cd Buzzer
-go build -o buzzer main.go
+
+### For Fedora/RHEL/CentOS
+
+Download the `.rpm` package and install it using `dnf`.
+
+```sh
+# Replace v1.x.x with the latest version
+wget https://github.com/Imnotndesh/buzzer/releases/download/v1.x.x/buzzer-1.x.x.x86_64.rpm
+sudo dnf install ./buzzer-1.x.x.x86_64.rpm
+```
+
+## Building from Source
+
+If you have Go installed, you can build `buzzer` from the source code.
+
+```sh
+git clone https://github.com/Imnotndesh/buzzer.git
+cd buzzer
+go build -o buzzer .
+sudo mv buzzer /usr/local/bin/
 ```
 # Commands
-Buzzer uses the following flags (_case-insensitive_) to achieve its functions:
-## -h 
-* Displays a summary of all usages for the program
-## -b [MAC_ADDRESS]
-* Wakes the computer using the passed MAC_ADDRESS
-## -w [ALIAS]
-* Uses the saved alias to wake the corresponding computer
-## -s [ALIAS] [MAC_ADDRESS]
-* Saves the passed Alias and Mac address for later use
-## -l
-* Prints out a list of saved mac addresses 
-## -e [ALIAS] [MAC_ADDRESS]
-* Assigns a new MAC address to the signed alias
-## -g
-* Fetches MAC Address tied to the alias passed
-## -r [ALIAS]
-* Removes passed alias and associated MAC_Address from storage
-## -v
-* Print out current program version
+
+Buzzer uses case-insensitive flags to perform its functions.
+
+---
+
+### `-S [ALIAS] [MAC_ADDRESS]`
+
+**S**tores a new machine by associating a MAC address with a memorable alias.
+
+### `-W [ALIAS]`
+
+**W**akes a machine using its stored alias.
+
+### `-B [MAC_ADDRESS]`
+
+**B**roadcasts a Wake-on-LAN packet directly to a specific MAC address.
+
+### `-L`
+
+**L**ists all stored aliases and their corresponding MAC addresses.
+
+### `-G [ALIAS]`
+
+**G**ets and displays the MAC address associated with a stored alias.
+
+### `-E [ALIAS] [NEW_MAC_ADDRESS]`
+
+**E**dits an existing entry to assign a new MAC address to an alias.
+
+### `-R [ALIAS]`
+
+**R**emoves an alias and its MAC address from the database.
+
+### `-H`
+
+Displays the **H**elp message with all available commands.
+
+### `-V`
+
+Prints the current **V**ersion of the program.
